@@ -1,0 +1,55 @@
+version: "3.9" # optional since v1.27.0
+services:
+  ubuntu:
+    build: ./ubuntu
+    volumes:
+      - ./ubuntu/volumes/opt:/opt
+      - ./ubuntu/volumes/home:/home
+    restart: on-failure
+    command: [ "sleep", "infinity" ]
+    environment:
+      - name=value
+  db:
+    image: couchbase:latest
+    deploy:
+      replicas: 1
+    ports:
+      - 8091-8094:8091-8094
+      - 11210:11210
+    volumes:
+      - ./couchbase/volumes/data:/opt/couchbase/var
+
+  server:
+    build: ./simpleServer
+    ports:
+      - 49160:8080
+    volumes:
+      - ./simpleServer/volumes/server:/usr/src/app/server
+      - ./simpleServer/volumes/functions/:/usr/src/app/postman
+      # gitlab:
+      #   image: 'gitlab/gitlab-ee:latest'
+      #   restart: always
+      #   hostname: 'gitlab.example.com'
+      #   environment:
+      #     GITLAB_OMNIBUS_CONFIG: |
+      #       external_url 'http://127.0.0.1:443'
+      #       gitlab_rails['gitlab_shell_ssh_port'] = 22
+      #       gitlab_rails['smtp_enable'] = true
+      #       gitlab_rails['smtp_address'] = "smtp.gmail.com"
+      #       gitlab_rails['smtp_port'] = 587
+      #       gitlab_rails['smtp_user_name'] = "falgitlab@gmail.com"
+      #       gitlab_rails['smtp_password'] = "leth12AL{}"
+      #       gitlab_rails['smtp_domain'] = "smtp.gmail.com"
+      #       gitlab_rails['smtp_authentication'] = "login"
+      #       gitlab_rails['smtp_enable_starttls_auto'] = true
+      #       gitlab_rails['smtp_tls'] = false
+      #       gitlab_rails['smtp_openssl_verify_mode'] = 'peer' # Can be: 'none', 'peer', 'client_once', 'fail_if_no_peer_cert', see http://api.rubyonrails.org/classes/ActionMailer/Base.html
+      #   ports:
+      #     - '80:80'
+      #     - '443:443'
+      #     - '22:22'
+      #   volumes:
+      #     - './volumes/config:/etc/gitlab'
+      #     - './volumes/logs:/var/log/gitlab'
+      #     - './volumes/data:/var/opt/gitlab'
+      #   shm_size: '256m'
