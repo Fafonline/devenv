@@ -25,5 +25,18 @@ app.get('/functions', (req, res) => {
   res.send(functions);
 });
 
+app.get('/helloWorld', (req, res) => {
+  const fs = require('fs');
+  let functions;
+  try {
+    functions = fs.readFileSync('postman/helloWorld.js', 'utf8');
+    console.log(functions);
+  } catch (err) {
+    console.error(err);
+  }
+
+  res.send(functions);
+});
+
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
