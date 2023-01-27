@@ -1,9 +1,13 @@
+
 FROM ubuntu:latest
 FROM python:latest
 FROM golang:latest
-WORKDIR /home/falcindor
-RUN HOME="/home/falcindor"
-RUN USER=falcindor
+
+ENV user=zeke
+
+WORKDIR /home/${zeke}
+RUN HOME="/home/${user}"
+RUN USER=${zeke}
 RUN apt update -y
 RUN date > version.txt
 RUN apt install -y git
