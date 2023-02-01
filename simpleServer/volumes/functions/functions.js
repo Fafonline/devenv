@@ -89,12 +89,6 @@ function generate_stay_dates() {
     //Continuous Stay
     var staysForContinuousStay = generateContinuousDays(3);
 
-    console.log("Continuous Stay dates")
-    console.log(staysForContinuousStay)
-
-    console.log("Share dates")
-    console.log(staysForShare)
-
     var sellStartDate_0 = staysForShare[0]['start'];
     var sellEndDate_0 = staysForShare[0]['end'];
 
@@ -154,6 +148,14 @@ function test_check_image_status(status) {
     });
 }
 
+function test_check_status(expected_status) {
+    var payload = JSON.parse(responseBody);
+    let status = payload['data']['hotelReservation']['status'];
+    pm.test("status=" + status, function () {
+        pm.expect(status).to.equal(expected_status)
+    });
+}
+
 function test_check_date() {
     var payload = JSON.parse(responseBody);
     let startDate = payload['data']['hotelReservation']['segments'][0]['offer']['productUses'].find(productUses => productUses.id === 1)['period']['start'];
@@ -168,10 +170,58 @@ function test_check_response_code(code) {
     });
 }
 
+function test_check_person_name(surname, givenName) {
+    var payload = JSON.parse(responseBody);
+    personName = payload['data']['hotelReservation']['userProfiles'].find(userProfile => userProfile.id === 1)["personName"]
+
+    console.log(personName)
+    //Add test
+    pm.test("Check Surname=" + surname + " | Given Name=" + givenName, function () {
+        pm.response.to.have.status(200);
+        pm.expect(personName['surname']).to.equal(surname)
+        pm.expect(personName['givenName']).to.equal(givenName)
+    });
+
+
+}
+
+function test_save_response_for_full_modify(cfNumber) {
+    var payload = JSON.parse(responseBody);
+    cf_map_string = pm.globals.get("cf_map");
+    var cf_map = undefined
+    if (cf_map_string) {
+        cf_map = JSON.parse(cf_map_string);
+    }
+    else {
+        cf_map = {}
+    }
+    cf_map[cfNumber] = JSON.stringify(payload);
+    postman.setGlobalVariable("cf_map", JSON.stringify(cf_map))
+}
+
+function test_get_last_response_for_full_modify(cfnumber) {
+    cf = pm.globals.get(cfnumber);
+    cf_map_string = pm.globals.get("cf_map");
+    if (cf_map_string) {
+        cf_map = JSON.parse(cf_map_string);
+        return JSON.parse(cf_map[cf]);
+    }
+    else {
+        console.log("Full payload for " + cfnumber + "Not found");
+        return none;
+    }
+
+}
+
+function test_stringify_full_modify_payload(payload_object) {
+    postman.setGlobalVariable("createdReservationString", JSON.stringify(payload_object))
+}
+
 function test_get_cf_number(cfNumber_var) {
     var payload = JSON.parse(responseBody);
     let cfNumber = payload['data']['hotelReservation']['reservationIds']['cfNumber']
     postman.setGlobalVariable(cfNumber_var, cfNumber);
+    test_save_response_for_full_modify(cfNumber)
     pm.test("CfNumber=" + cfNumber)
 }
 
