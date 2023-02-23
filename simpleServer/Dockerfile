@@ -12,4 +12,4 @@ RUN npm install
 # Bundle app source
 COPY . .
 EXPOSE 8080
-CMD [ "node", "./server/server.js" ]
+CMD [ "node", "./volumes/server/server.js" ]

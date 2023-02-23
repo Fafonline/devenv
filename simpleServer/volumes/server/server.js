@@ -16,7 +16,7 @@ app.get('/functions', (req, res) => {
   const fs = require('fs');
   let functions;
   try {
-    functions = fs.readFileSync('postman/functions.js', 'utf8');
+    functions = fs.readFileSync('volumes/functions/functions.js', 'utf8');
     console.log(functions);
   } catch (err) {
     console.error(err);
@@ -29,7 +29,7 @@ app.get('/helloWorld', (req, res) => {
   const fs = require('fs');
   let functions;
   try {
-    functions = fs.readFileSync('postman/helloWorld.js', 'utf8');
+    functions = fs.readFileSync('volumes/functions/helloWorld.js', 'utf8');
     console.log(functions);
   } catch (err) {
     console.error(err);

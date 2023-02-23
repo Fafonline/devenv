@@ -5,5 +5,5 @@ services:
     ports:
       - 49160:8080
     volumes:
-      - ./volumes/server:/usr/src/app/server
-      - ./volumes/functions/:/usr/src/app/postman
+      - ./volumes/server:/usr/src/app/volumes/server
+      - ./volumes/functions/:/usr/src/app/volumes/functions

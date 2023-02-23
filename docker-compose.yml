@@ -5,6 +5,7 @@ services:
     volumes:
       - ./ubuntu/volumes/opt:/opt
       - ./ubuntu/volumes/home:/home
+      - Z:/MAINTENANCE:/MAINTENANCE
     restart: on-failure
     command: [ "sleep", "infinity" ]
     environment:
@@ -24,6 +25,5 @@ services:
     ports:
       - 49160:8080
     volumes:
-      - ./simpleServer/volumes/server:/usr/src/app/server
-      - ./simpleServer/volumes/functions/:/usr/src/app/postman
-
+      - ./simpleServer/volumes/server:/usr/src/app/volumes/server/
+      - ./simpleServer/volumes/functions/:/usr/src/app/volumes/functions

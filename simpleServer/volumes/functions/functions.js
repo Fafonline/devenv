@@ -73,7 +73,7 @@ function generate_stay_dates() {
     baseDate_six_mounth_in_future = addDays(baseDate, 182);
     postman.setGlobalVariable("baseDate", formatDate(baseDate))
     postman.setGlobalVariable("baseDate_plus_one_week", formatDate(baseDate_plus_one_week));
-    postman.setGlobalVariable("baseDate_plus_one_month", formatDate(baseDate_plus_one_month));
+    postman.setGlobalVariable("baseDate_plus_one_month", formatDate(baseDate_plus_odeplyne_month));
     postman.setGlobalVariable("baseDate_six_mounth_in_past", formatDate(baseDate_six_mounth_in_past));
     postman.setGlobalVariable("baseDate_six_mounth_in_future", formatDate(baseDate_six_mounth_in_future));
 
@@ -272,5 +272,9 @@ function test_check_warning(present, code = 0) {
             }
         });
     }
+}
+
+function var_set_tech_id(tech_id) {
+    postman.setGlobalVariable("techId", tech_id)
 }
 
