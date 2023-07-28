@@ -23,7 +23,7 @@ services:
   server:
     build: ./simpleServer
     ports:
-      - 49160:8080
+      - 8080:8080
     volumes:
       - ./simpleServer/volumes/server:/usr/src/app/volumes/server/
       - ./simpleServer/volumes/functions/:/usr/src/app/volumes/functions
@@ -33,3 +33,8 @@ services:
       - db
     ports:
       - 5000:5000
+    volumes:
+      - ./mealme_be:/python-docker
+    environment:
+      FLASK_DEBUG: 1
+      FLASK_APP: ./app.py

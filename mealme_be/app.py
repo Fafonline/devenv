@@ -6,24 +6,51 @@ from couchbase.options import (ClusterOptions, ClusterTimeoutOptions,
 import secrets
 import uuid
 from couchbase.n1ql import N1QLQuery
+import time
 
 app = Flask(__name__)
 
-# Couchbase configuration
-COUCHBASE_URL = "couchbase://db"
-COUCHBASE_USER = "guest"
-COUCHBASE_PASSWORD = "password"
-COUCHBASE_BUCKET = "meal_me"  # Replace with your actual bucket name
 COUCHBASE_MEAL_PREFIX = "meal::"
 COUCHBASE_MENU_PREFIX = "menu::"
 
-# Initialize Couchbase cluster and authenticate
-authenticator = PasswordAuthenticator(COUCHBASE_USER, COUCHBASE_PASSWORD)
-options = ClusterOptions(authenticator)
-cluster = Cluster(COUCHBASE_URL,options)
+def connect_to_couchbase():
+ # Couchbase configuration
+ COUCHBASE_URL = "couchbase://db"
+ COUCHBASE_USER = "guest"
+ COUCHBASE_PASSWORD = "password"
+ COUCHBASE_BUCKET = "meal_me"  # Replace with your actual bucket name
 
-# Connect to the bucket
-bucket = cluster.bucket(COUCHBASE_BUCKET)
+
+ # Initialize Couchbase cluster and authenticate
+ authenticator = PasswordAuthenticator(COUCHBASE_USER, COUCHBASE_PASSWORD)
+ options = ClusterOptions(authenticator)
+ cluster = Cluster(COUCHBASE_URL,options)
+ # Connect to the bucket
+ bucket = cluster.bucket(COUCHBASE_BUCKET)
+ return cluster, bucket
+
+cluster = None
+bucket  = None
+
+max_retries = 30
+retry_interval = 1  # Retry every 1 second
+retry_count = 0
+while retry_count < max_retries:
+    try:
+        cluster, bucket = connect_to_couchbase()
+        print("Connected to Couchbase!")
+        break  # Connection successful, break out of the loop
+    except Exception as e:
+        print(f"Failed to connect to Couchbase: {str(e)}")
+        retry_count += 1
+        time.sleep(retry_interval)
+
+# Check if the connection was successful
+if retry_count == max_retries:
+    print("Failed to connect to Couchbase after max retries.")
+    exit
+
+
 collection = bucket.default_collection()
 
 
@@ -54,6 +81,7 @@ def create_meal():
     meal_unique_id = generate_random_id()
     data["id"] = meal_unique_id
     data["preparation_count"]=0
+    # data["test"]="test"
     meal_key = COUCHBASE_MEAL_PREFIX + meal_unique_id
     collection.insert(meal_key, data)
     return jsonify(data), 201
@@ -126,7 +154,6 @@ def update_menu(menu_id):
     current_menu.update(data)
     collection.replace(menu_key, current_menu)
     return jsonify(current_menu)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
