@@ -18,3 +18,6 @@ curl db:8091
 # Couchbase UI
 URL: http://localhost:8091/ui/index.html
 Date persisted in /opt/volumes/opt/couchbase/var
+
+login: guest
+password: password

@@ -33,12 +33,16 @@ RUN apt install python3-pip -y
 #</PIP>
 
 #<autoPEP>
-RUN python3 -m pip install -U autopep8 
+# RUN python3 -m pip install -U autopep8 
 #</autoPEP>
 
 #<matplotlib>
-RUN python3 -m pip install matplotlib
+# RUN python3 -m pip install matplotlib requests
 #</matplotlib>
+
+# For MealMe
+# RUN pip install Flask couchbase
+# RUN npm install -g @angular/cli
 
 #<Repo>
 RUN mkdir -p /opt/bin
@@ -57,7 +61,7 @@ RUN apt-get install -y nodejs
 #</Node>
 
 #<For prometheus_pods_alerting>
-RUN pip3 install --index-url https://repository.rnd.amadeus.net/api/pypi/pypi/simple pyyaml Jinja2
+# RUN pip3 install --index-url https://repository.rnd.amadeus.net/api/pypi/pypi/simple pyyaml Jinja2
 
 
 

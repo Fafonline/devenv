@@ -5,7 +5,7 @@ services:
     volumes:
       - ./ubuntu/volumes/opt:/opt
       - ./ubuntu/volumes/home:/home
-      - Z:/MAINTENANCE:/MAINTENANCE
+      # - Z:/MAINTENANCE:/MAINTENANCE
     restart: on-failure
     command: [ "sleep", "infinity" ]
     environment:
@@ -27,3 +27,9 @@ services:
     volumes:
       - ./simpleServer/volumes/server:/usr/src/app/volumes/server/
       - ./simpleServer/volumes/functions/:/usr/src/app/volumes/functions
+  mealme_be:
+    build: ./mealme_be
+    depends_on:
+      - db
+    ports:
+      - 5000:5000
