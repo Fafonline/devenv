@@ -5,20 +5,24 @@ services:
     volumes:
       - ./ubuntu/volumes/opt:/opt
       - ./ubuntu/volumes/home:/home
+      - ../mealme:/home/mealme
+      - H:/My Drive/Personnel:/home/obsidian_vault
+      - Z:/HCI:/home/HCI
       # - Z:/MAINTENANCE:/MAINTENANCE
+
     restart: on-failure
     command: [ "sleep", "infinity" ]
     environment:
       - name=value
-  db:
-    image: couchbase:latest
-    deploy:
-      replicas: 1
-    ports:
-      - 8091-8094:8091-8094
-      - 11210:11210
-    volumes:
-      - ./couchbase/volumes/data:/opt/couchbase/var
+  # db:
+  #   image: couchbase:latest
+  #   deploy:
+  #     replicas: 1
+  #   ports:
+  #     - 8091-8094:8091-8094
+  #     - 11210:11210
+  #   volumes:
+  #     - ./couchbase/volumes/data:/opt/couchbase/var
 
   server:
     build: ./simpleServer
@@ -27,14 +31,22 @@ services:
     volumes:
       - ./simpleServer/volumes/server:/usr/src/app/volumes/server/
       - ./simpleServer/volumes/functions/:/usr/src/app/volumes/functions
-  mealme_be:
-    build: ./mealme_be
-    depends_on:
-      - db
-    ports:
-      - 5000:5000
-    volumes:
-      - ./mealme_be:/python-docker
-    environment:
-      FLASK_DEBUG: 1
-      FLASK_APP: ./app.py
+  # mealme_be:
+  #   build: ./mealme_be
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - 5000:5000
+
+  #   volumes:
+  #     - ./mealme_be:/python-docker
+  #   environment:
+  #     FLASK_DEBUG: 1
+  #     FLASK_APP: ./app.py
+
+  # mealme_fe:
+  #   build: ./mealme_fe
+  #   depends_on:
+  #     - mealme_be
+  #   ports:
+  #     - 80:80

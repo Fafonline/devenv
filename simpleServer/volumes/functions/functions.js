@@ -33,6 +33,67 @@ function generateStayDate(numberOfStay = 1, horizonInDay = 31, maxStayLength = 7
     return stays;
 }
 
+function generateComplexeStayDates(horizonInDay = 31) {
+    startStayDate = formatDate(addDays(Date.now(), 1 + horizonInDay + ((Math.random() - 0.5) * 2) * horizonInDay));
+    let reservations = [];
+    //R1
+    let cf1 = {
+        start: startStayDate,
+        end: formatDate(addDays(startStayDate, 2)) // two nights
+    }
+    reservations[0] = cf1
+    //R2
+    let startDate = formatDate(subDays(cf1["end"], 1))
+    let cf2 = {
+        start: startDate, // Overlap R1 last day
+        end: formatDate(addDays(startDate, 2)) // two nights
+    }
+    reservations[1] = cf2
+    //R3
+    startDate = cf2["end"]
+    let cf3 = {
+        start: startDate, // continuous with checkout day of R2
+        end: formatDate(addDays(startDate, 2)) // two night
+    }
+    reservations[2] = cf3
+
+    for (let i = 0; i < reservations.length; i++) {  //.toString().padStart(5, '0')
+
+        let reservationId = i + 1;
+        reservationStartDateIdentifier = `cf${reservationId.toString().padStart(1, '0')}_checkin`
+        reservationEndDateIdentifier = `cf${reservationId.toString().padStart(1, '0')}_checkout`
+
+        postman.setGlobalVariable(reservationStartDateIdentifier, reservations[i]["start"])
+        postman.setGlobalVariable(reservationEndDateIdentifier, reservations[i]["end"])
+        console.log("Create new variable " + reservationStartDateIdentifier + ":" + reservations[i]["start"])
+        console.log("Create new variable " + reservationEndDateIdentifier + ":" + reservations[i]["end"])
+    }
+}
+
+
+function generateStayDates(stays, horizonInDay = 31) {
+    console.log(stays)
+    startStayDate = formatDate(addDays(Date.now(), 1 + horizonInDay + ((Math.random() - 0.5) * 2) * horizonInDay));
+    let reservationIdentifierIndex = 0;
+    for (reservationIdentifierIndex in stays) {
+        let stay = stays[reservationIdentifierIndex]
+        reservationIdentifierIndex++;
+        let cf = {
+            start: formatDate(addDays(startStayDate, stay["start"])),
+            end: formatDate(addDays(startStayDate, stay["end"])) // two nights
+        }
+        reservationStartDateIdentifier = `cf${reservationIdentifierIndex.toString().padStart(1, '0')}_checkin`
+        reservationEndDateIdentifier = `cf${reservationIdentifierIndex.toString().padStart(1, '0')}_checkout`
+
+        postman.setGlobalVariable(reservationStartDateIdentifier, cf["start"])
+        postman.setGlobalVariable(reservationEndDateIdentifier, cf["end"])
+
+        console.log("Create new variable " + reservationStartDateIdentifier + ":" + cf["start"])
+        console.log("Create new variable " + reservationEndDateIdentifier + ":" + cf["end"])
+    }
+}
+
+
 function generateOverlappingDays(numberOfStay = 2, horizonInDay = 31, maxStayLength = 7) {
     var stays = [];
     var shareStartDay = formatDate(addDays(Date.now(), 1 + horizonInDay + ((Math.random() - 0.5) * 2) * horizonInDay));
@@ -73,7 +134,7 @@ function generate_stay_dates() {
     baseDate_six_mounth_in_future = addDays(baseDate, 182);
     postman.setGlobalVariable("baseDate", formatDate(baseDate))
     postman.setGlobalVariable("baseDate_plus_one_week", formatDate(baseDate_plus_one_week));
-    postman.setGlobalVariable("baseDate_plus_one_month", formatDate(baseDate_plus_odeplyne_month));
+    postman.setGlobalVariable("baseDate_plus_one_month", formatDate(baseDate_plus_one_month));
     postman.setGlobalVariable("baseDate_six_mounth_in_past", formatDate(baseDate_six_mounth_in_past));
     postman.setGlobalVariable("baseDate_six_mounth_in_future", formatDate(baseDate_six_mounth_in_future));
 
@@ -138,7 +199,19 @@ function generate_stay_dates() {
     postman.setGlobalVariable("cs_sellStartDate_cf3", cs_sellStartDate_cf3);
     postman.setGlobalVariable("cs_sellEndDate_cf3", cs_sellEndDate_cf3);
     postman.setGlobalVariable("cs_sellEndDate_cf3_extended", cs_sellEndDate_cf3_extended);
+
+    postman.setGlobalVariable("now", formatDate(Date.now()));
+    console.log(">>> Now:", formatDate(Date.now()))
 }
+
+function modifyDate(dateIdentifier, offset) {
+    let date = pm.globals.get(dateIdentifier);
+    labelForNewDate = dateIdentifier + "_" + "modified"
+    date = formatDate(addDays(date, offset))
+    postman.setGlobalVariable(labelForNewDate, date)
+    return labelForNewDate
+}
+
 
 function test_check_image_status(status) {
     var payload = JSON.parse(responseBody);
@@ -183,6 +256,15 @@ function test_check_person_name(surname, givenName) {
     });
 
 
+}
+
+function getTechId(cfNumberIdentier) {
+    var payload = JSON.parse(responseBody);
+    techId = payload["booking"][0]
+    let label = cfNumberIdentier + "_" + "techId"
+    postman.setGlobalVariable(label, techId)
+    console.log("TechId label: ", label)
+    return { label: label, techId: techId }
 }
 
 function test_save_response_for_full_modify(cfNumber) {
@@ -278,3 +360,92 @@ function var_set_tech_id(tech_id) {
     postman.setGlobalVariable("techId", tech_id)
 }
 
+function var_get_tech_id() {
+    payload = JSON.parse(responseBody);
+    tech_id = payload["booking"][0];
+    var_set_tech_id(tech_id)
+    return tech_id;
+}
+
+function test_stayDate() {
+    payload = JSON.parse(responseBody);
+    console.log(payload)
+    checkinDate = payload["data"]["hotelReservation"]["segments"][0]["start"]
+    checkoutDate = payload["data"]["hotelReservation"]["segments"][0]["end"]
+
+    pm.test(`start=${checkinDate} / end=${checkoutDate}`, function () {
+    });
+
+    return { start: checkinDate, end: checkoutDate }
+}
+
+function MatchJsonObject(jsonPath, expectedObject) {
+    const jsonObject = JSON.parse(responseBody);
+    if (expectedObject === undefined) {
+        const subObject = _.get(jsonObject, jsonPath);
+        if (subObject === undefined) {
+            pm.response.to.have.status(200);
+        }
+        else {
+            pm.expect.fail(`Object found [${jsonPath}]`)
+        }
+    }
+    else {
+        expectedObject = JSON.parse(expectedObject);
+        const subObject = _.get(jsonObject, jsonPath);
+        let result;
+        if (subObject === undefined) {
+            pm.expect.fail("Object not found in path " + `[${jsonPath}]`)
+        }
+        const isMatch = JSON.stringify(expectedObject) === JSON.stringify(subObject);
+        console.log(JSON.stringify(expectedObject));
+        console.log(JSON.stringify(subObject));
+        if (isMatch) {
+            pm.response.to.have.status(200);
+        } else {
+            pm.expect.fail("Value is different")
+        }
+    }
+}
+
+
+function groupGenerateGroupCode() {
+    let length = 3
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let randomString = '';
+
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        randomString += characters.charAt(randomIndex);
+    }
+    pm.globals.set("groupCode", randomString)
+    console.log("Groupcode=" + randomString)
+}
+
+function groupGenerateGroupPeriod() {
+    groupPeriod = generateStayDate(numberOfStay = 1)[0];
+    console.log("Group period:" + groupPeriod)
+    pm.globals.set("grp_periodStart", groupPeriod["start"]);
+    pm.globals.set("grp_periodEnd", groupPeriod["end"]);
+}
+
+function groupGenerateGroupName() {
+    let groupName = "groupNameFor" + pm.globals.get("groupCode");
+    pm.globals.set("groupName", groupName);
+}
+
+function groupSetEnvironment() {
+    pm.environment.set("grp_chainCode", "HRF");
+    pm.environment.set("grp_propertyCode", "BNFHN");
+    pm.environment.set("grp_ratePlan", "BARPG");
+    pm.environment.set("grp_inventoryCode", "ABCK");
+    groupGenerateGroupCode();
+    groupGenerateGroupName();
+    groupGenerateGroupPeriod();
+}
+
+function group_getGroupCfNumber() {
+    payload = JSON.parse(responseBody)
+    groupCfNumber = payload["data"]["group"]["groupIds"]["groupCfNumber"]
+    pm.globals.set("groupCfNumber", groupCfNumber)
+}

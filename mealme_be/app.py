@@ -12,13 +12,13 @@ app = Flask(__name__)
 
 COUCHBASE_MEAL_PREFIX = "meal::"
 COUCHBASE_MENU_PREFIX = "menu::"
+COUCHBASE_BUCKET = "meal_me"  # Replace with your actual bucket name
 
 def connect_to_couchbase():
  # Couchbase configuration
  COUCHBASE_URL = "couchbase://db"
  COUCHBASE_USER = "guest"
  COUCHBASE_PASSWORD = "password"
- COUCHBASE_BUCKET = "meal_me"  # Replace with your actual bucket name
 
 
  # Initialize Couchbase cluster and authenticate
@@ -72,6 +72,16 @@ def get_meal_by_id(meal_id):
         return jsonify(meal)
     return jsonify({"error": "Meal not found"}), 404
 
+# Route function to get all meals
+@app.route("/meals", methods=["GET"])
+def get_meals():
+    # Fetch all meals from the Couchbase bucket
+    query = "SELECT * FROM `{}` WHERE META().id LIKE 'meal::%'".format(COUCHBASE_BUCKET)
+    result = cluster.query(query)
+    meals = [row for row in result]
+
+    # Return the meals as an array of JSON documents in the response
+    return jsonify(meals)
 
 @app.route("/meal/", methods=["POST"])
 def create_meal():
