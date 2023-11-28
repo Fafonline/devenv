@@ -1,9 +1,0 @@
-version: "3.9" # optional since v1.27.0
-services:
-  server:
-    build: ./simpleServer
-    ports:
-      - 49160:8080
-    volumes:
-      - ./volumes/server:/usr/src/app/volumes/server
-      - ./volumes/functions/:/usr/src/app/volumes/functions
